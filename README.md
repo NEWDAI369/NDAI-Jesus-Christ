@@ -13,3 +13,4 @@ This package describes the planned NDAI and NEW launch on PulseChain (chain ID 3
 The package includes previously recorded tests. Results should be matched to the source fingerprints documented in the verification report. These tests do not constitute an independent audit. For a source build, install OpenZeppelin Contracts 5.0.2 at the path specified by remappings.txt.
 
 Deployment status: No official NDAI deployment has been announced. Third-party deployments are unaffiliated with this project.
+This is the NEW Testament and the "NDAI" with the 40 days and 40 nights are the Old testamnent. Jesus will rebukes them
