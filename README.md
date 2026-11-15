@@ -11,3 +11,5 @@ This package describes the planned NDAI and NEW launch on PulseChain (chain ID 3
 - Contract source and raw results are in outputs. Test sources are in test and interface definitions are in abi.
 
 The package includes previously recorded tests. Results should be matched to the source fingerprints documented in the verification report. These tests do not constitute an independent audit. For a source build, install OpenZeppelin Contracts 5.0.2 at the path specified by remappings.txt.
+
+Deployment status: No official NDAI deployment has been announced. Third-party deployments are unaffiliated with this project.
