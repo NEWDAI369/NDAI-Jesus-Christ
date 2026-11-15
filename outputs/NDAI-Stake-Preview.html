@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NDAI Stake • Local Preview</title>
+<style>
+:root{font-family:Inter,system-ui,sans-serif;color:#172b31;background:#eff4f2;line-height:1.55;--ink:#172b31;--muted:#50666d;--stroke:#d5e1de;--green:#146451;--dark:#173b35}
+*{box-sizing:border-box} body{margin:0} button,input,select{font:inherit} button{cursor:pointer}
+header{background:var(--dark);color:white}.bar,main{max-width:1040px;margin:auto;padding:18px 24px}.bar{display:flex;justify-content:space-between;align-items:center;gap:12px}.brand{font-weight:850;letter-spacing:.08em}.mode{font-size:.83rem;color:#d6e8e1}
+main{padding-top:40px;padding-bottom:40px}h1,h2,p{margin:0}.intro{margin-bottom:24px}.intro p,.description,.hint{color:var(--muted)}h1{font-size:clamp(2rem,5vw,3.4rem);line-height:1.15;letter-spacing:-.055em;margin-bottom:6px}
+.panel{background:white;border:1px solid var(--stroke);border-radius:18px;padding:22px;margin-bottom:18px}.summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}dt,.label{font-size:.84rem;color:var(--muted)}dd{margin:4px 0 0;font-weight:760;overflow-wrap:anywhere}.token{font-variant-numeric:tabular-nums}
+.controls{display:flex;align-items:center;justify-content:space-between;gap:8px 16px;flex-wrap:wrap;margin-bottom:16px}.controls select{border:1px solid var(--stroke);padding:6px 9px;background:white;border-radius:8px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}.grid .panel{display:flex;flex-direction:column}.description{margin:7px 0 16px}.status{color:var(--green);font-size:.9rem;font-weight:700;margin-bottom:8px}
+label{display:block;margin-bottom:5px;font-weight:680}input{width:100%;padding:11px;border:1px solid #96aba4;border-radius:9px;background:#fafcfa;color:var(--ink)}
+button{padding:11px 15px;border-radius:9px;background:var(--green);color:white;border:1px solid transparent;font-weight:730}button:disabled{opacity:.5;cursor:default}.secondary{background:white;color:var(--green);border-color:#b1c7be}.grid button{margin-top:auto}form{display:grid;gap:8px;flex:1}.error{font-size:.9rem;color:#862b30;min-height:1.35rem}
+:focus-visible{outline:3px solid #398981;outline-offset:3px}dialog{width:min(92vw,480px);padding:24px;border:1px solid var(--stroke);border-radius:18px;color:var(--ink);box-shadow:0 12px 64px #09261f30}dialog::backdrop{background:#122a28aa}dialog p{margin-top:10px}.preview{padding:12px;background:#f0f6f2;border-radius:10px}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}
+@media(max-width:660px){.grid{grid-template-columns:1fr;gap:0}.summary{grid-template-columns:1fr 1fr}.summary>div:first-child{grid-column:1/-1}main{padding:26px 16px}.bar{padding:15px 16px}.panel{padding:16px}}
+</style>
+</head>
+<body>
+<header><div class="bar"><span class="brand">NDAI</span><span class="mode">Local preview · simulated balances</span></div></header>
+<main>
+  <section class="intro"><h1>Manage NEW</h1><p>Review how debt retirement and redemption affect your NDAI.</p></section>
+  <dl class="panel summary">
+    <div><dt>Example redemption date</dt><dd id="date"></dd></div>
+    <div><dt>NEW balance</dt><dd class="token" id="claims"></dd></div>
+    <div><dt>NDAI in wallet</dt><dd class="token" id="wallet"></dd></div>
+    <div><dt>Position debt</dt><dd class="token" id="debt"></dd></div>
+    <div><dt>Free NDAI in position</dt><dd class="token" id="free"></dd></div>
+  </dl>
+  <div class="controls">
+    <label for="clock">Preview time
+      <select id="clock"><option value="before">Before maturity</option><option value="at">At maturity</option><option value="after">After maturity</option></select>
+    </label>
+    <button type="button" class="secondary" id="reset">Reset demo</button>
+  </div>
+  <div class="grid">
+    <section class="panel">
+      <h2>Retire Debt</h2><p class="description">Burn NEW to free NDAI inside your position. Withdraw that NDAI at maturity.</p>
+      <p class="status" id="retire-status"></p>
+      <form id="retire">
+        <label for="retire-amount">NEW to burn</label><input id="retire-amount" inputmode="decimal" value="200" aria-describedby="retire-error">
+        <p class="error" id="retire-error" aria-live="polite"></p><button type="submit">Review retirement</button>
+      </form>
+    </section>
+    <section class="panel">
+      <h2>Redeem Time Tokens</h2><p class="description">Burn NEW at maturity to receive the same amount of NDAI in your wallet.</p>
+      <p class="status" id="redeem-status"></p>
+      <form id="redeem">
+        <label for="redeem-amount">NEW to burn</label><input id="redeem-amount" inputmode="decimal" value="200" aria-describedby="redeem-error">
+        <p class="error" id="redeem-error" aria-live="polite"></p><button type="submit">Review redemption</button>
+      </form>
+    </section>
+  </div>
+  <p id="result" role="status"></p>
+</main>
+<dialog aria-labelledby="confirmation">
+  <h2 id="confirmation"></h2>
+  <p class="preview" id="effect"></p><p class="hint" id="timing"></p>
+  <p class="error" id="dialog-error" aria-live="polite"></p>
+  <form method="dialog" class="actions">
+    <button class="secondary" value="cancel">Back</button>
+    <button type="button" id="apply">Simulate confirmation</button>
+  </form>
+</dialog>
+<script src="ndai-stake-preview.js"></script>
+<script>
+const { applyPreview, demoState, quote, formatAmount, TICKER } = window.NdaiStakePreview;
+const el = (id) => document.getElementById(id);
+const dialog = document.querySelector("dialog");
+const utc = (ms) => new Date(ms).toISOString().slice(0, 16).replace("T", " ") + " UTC";
+let state = demoState();
+let preview;
+
+function render() {
+  el("date").textContent = utc(state.maturity);
+  el("claims").textContent = formatAmount(state.claims);
+  el("wallet").textContent = formatAmount(state.walletNdai);
+  el("debt").textContent = formatAmount(state.debt);
+  el("free").textContent = formatAmount(state.free);
+  const open = state.now >= state.maturity;
+  el("retire-status").textContent = open ? "Closed at maturity" : "Available before maturity";
+  el("redeem-status").textContent = open ? "Available now" : "Opens at maturity";
+  el("retire").querySelector("button").disabled = open;
+  el("redeem").querySelector("button").disabled = !open;
+}
+
+for (const action of ["retire", "redeem"]) {
+  el(action).addEventListener("submit", (event) => {
+    event.preventDefault();
+    el(action + "-error").textContent = "";
+    try {
+      preview = quote(state, action, el(action + "-amount").value);
+      const amount = formatAmount(preview.amount);
+      const retire = action === "retire";
+      el("confirmation").textContent = retire ? "Review debt retirement" : "Review redemption";
+      el("effect").textContent = "Burn " + amount + " " + TICKER + " → " +
+        (retire ? "free " + amount + " NDAI inside your position" : "receive " + amount + " NDAI in your wallet");
+      el("timing").textContent = retire ? "Withdrawable from " + utc(preview.maturity) + "." :
+        "Redemption opened on " + utc(preview.maturity) + ".";
+      el("dialog-error").textContent = "";
+      dialog.showModal();
+    } catch (error) {
+      el(action + "-error").textContent = error.message;
+    }
+  });
+}
+
+el("clock").addEventListener("change", (event) => {
+  const offsets = { before: -86400000, at: 0, after: 86400000 };
+  state.now = state.maturity + offsets[event.target.value];
+  for (const action of ["retire", "redeem"]) el(action + "-error").textContent = "";
+  render();
+});
+el("apply").addEventListener("click", () => {
+  try {
+    state = applyPreview(state, preview);
+    el("result").textContent = preview.action === "retire"
+      ? "Simulated retirement complete. Your free position balance increased."
+      : "Simulated redemption complete. Your NDAI wallet balance increased.";
+    dialog.close();
+    render();
+  } catch (error) {
+    el("dialog-error").textContent = error.message;
+  }
+});
+el("reset").addEventListener("click", () => {
+  state = demoState();
+  el("clock").value = "before";
+  el("result").textContent = "";
+  for (const action of ["retire", "redeem"]) {
+    el(action + "-error").textContent = "";
+    el(action + "-amount").value = "200";
+  }
+  render();
+});
+render();
+</script>
+</body>
+</html>

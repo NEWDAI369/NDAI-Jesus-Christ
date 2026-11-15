@@ -1,0 +1,6 @@
+{
+  "chainId": 369,
+  "series": [
+    { "redemptionDay": 3300, "symbol": "NEW", "claimTokenAddress": null }
+  ]
+}

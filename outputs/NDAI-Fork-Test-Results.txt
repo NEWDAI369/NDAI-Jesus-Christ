@@ -1,0 +1,102 @@
+Compiling 4 files with Solc 0.8.24
+Solc 0.8.24 finished in 29.01s
+Compiler run successful!
+
+Ran 10 tests for test/NDAIActivationFlow.t.sol:NDAIActivationFlowTest
+[PASS] testCoalescingCancellationAndExactActivation() (gas: 884086)
+[PASS] testColdFullIssue() (gas: 9233677)
+[PASS] testColdFullWithdrawalWithBurn() (gas: 8945012)
+[PASS] testColdPartialCompactionWithEightTranches() (gas: 8873599)
+[PASS] testCompetingDepositorCanRepeatedlyTakeFreedSlot() (gas: 12587763)
+[PASS] testFirstIssuanceWaivesFeeAtZeroWeight() (gas: 184636)
+[PASS] testFullQueueRejectsThenRecoversAfterCancellationAndActivation() (gas: 9437972)
+[PASS] testIssuanceCollectsFeeAtExactActivation() (gas: 722013)
+[PASS] testLaterIssuanceWaivesFeeAfterLastEligibleDepositExits() (gas: 790197)
+[PASS] testRepeatedSaturationAndRecovery() (gas: 67203149)
+Suite result: ok. 10 passed; 0 failed; 0 skipped; finished in 8.82s (35.81s CPU time)
+
+Ran 11 tests for test/NDAIV2.t.sol:NDAIV2Test
+[PASS] testGuardedMintEndpoints() (gas: 1787688)
+[PASS] testGuardedMintRejectsOutsideRange() (gas: 65482)
+[PASS] testGuardedMintRevertsOnReserveFraction() (gas: 743795)
+[PASS] testImpossibleLpMinimumRollsBackMint() (gas: 1796013)
+[PASS] testImpossiblePdaiDepositRollsBackMint() (gas: 1118738)
+[PASS] testImpossiblePlsxDepositRollsBackMint() (gas: 1218289)
+[PASS] testMint100DepositsDaiAndLp() (gas: 1837301)
+[PASS] testMintAndStakeOpenAtLaunch() (gas: 6394669)
+[PASS] testMintFundedPositionAndFeeVaultLifecycle() (gas: 7478140)
+[PASS] testSpendingCapRejectsMint() (gas: 109489)
+[PASS] testTransferredStakeAndClaimsPayAtMaturityOnlyOnce() (gas: 6909748)
+Suite result: ok. 11 passed; 0 failed; 0 skipped; finished in 17.34s (105.79s CPU time)
+
+Ran 8 tests for test/NDAIIntegrated.t.sol:NDAIIntegratedTest
+[PASS] testApprovedVaultCapAndCeilingPreserveExits() (gas: 1696348)
+[PASS] testBacklogBlocksIssuanceAndAllowsWithdrawal() (gas: 13650807)
+[PASS] testBuyerBoundsAndCustodyAuthorization() (gas: 1102090)
+[PASS] testCheckpointPersistsUntilAllTranchesSettle() (gas: 1869675)
+[PASS] testFuzzFeesAcrossCohortChanges(uint64,uint64,uint64) (runs: 2048, μ: 2419169, ~: 2425341)
+[PASS] testFuzzSeriesCollateralConservation(uint96,uint96,bool) (runs: 2048, μ: 1291699, ~: 1293528)
+[PASS] testMatchingVaultWaiverAndSeparateCustody() (gas: 1917657)
+[PASS] testSeriesComponentsRejectOtherChains() (gas: 528190)
+Suite result: ok. 8 passed; 0 failed; 0 skipped; finished in 17.35s (37.47s CPU time)
+
+Ran 6 tests for test/NDAIAccountingValidation.t.sol:NDAIAccountingValidationTest
+[PASS] testFuzzRoundingConservesScaledFees(uint128,uint128,uint128) (runs: 2048, μ: 1135, ~: 1125)
+[PASS] testLifetimeIndexLimit() (gas: 3882)
+[PASS] testProposedCapAndLifetimeFeeBounds() (gas: 184)
+[PASS] testRetirementAndRedemptionAfterNftWithdrawal() (gas: 6938979)
+[PASS] testRetirementAndRedemptionBeforeNftWithdrawal() (gas: 6939007)
+[PASS] testWideProductAndRemainderCarry() (gas: 289)
+Suite result: ok. 6 passed; 0 failed; 0 skipped; finished in 24.62s (4.08s CPU time)
+
+Ran 3 tests for test/NDAIActivationBenchmark.t.sol:NDAIActivationBenchmark
+[PASS] testColdQueue128Tranches32() (gas: 10441039)
+[PASS] testColdQueue32Tranches8() (gas: 3001786)
+[PASS] testColdQueue64Tranches16() (gas: 5481500)
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 24.62s (608.95ms CPU time)
+
+Ran 6 tests for test/NDAIQueueScale.t.sol:NDAIQueueScaleTest
+[PASS] testBurstRecoveryAfterMissedInterval() (gas: 24374427)
+[PASS] testRecovery100() (gas: 15445535)
+[PASS] testRecovery1000() (gas: 82835220)
+[PASS] testRecovery10000() (gas: 756979408)
+[PASS] testRecovery10000Live() (gas: 840891633)
+[PASS] testRepeatedRedepositAndSimultaneousActivation() (gas: 31836255)
+Suite result: ok. 6 passed; 0 failed; 0 skipped; finished in 24.62s (38.65s CPU time)
+
+Ran 15 tests for test/NDAICatchUpAndRetirement.t.sol:NDAICatchUpAndRetirementTest
+[PASS] testBacklogExitPreservesEarnedFeesAndCancelsUnprocessedWeight() (gas: 16951479)
+[PASS] testCatchUpAllowsMoreThan32KeysAndGuardsStaleIssuance() (gas: 13839141)
+[PASS] testCatchUpWhileMoreActivationsBecomeDue() (gas: 59887579)
+[PASS] testCeilingCrossingRollsBackAndPreservesExitPaths() (gas: 5311837)
+[PASS] testFeeDerivedClaimRetiresTransferredPosition() (gas: 5294017)
+[PASS] testPartialBacklogExitAcrossThreeActivationStates() (gas: 3628928)
+[PASS] testPositionAndFeeCustodyRejectUnauthorizedPayouts() (gas: 4846515)
+[PASS] testPositionIssuanceFeeWaiverLifecycle() (gas: 5129781)
+[PASS] testPrunedQueueRecoversAfterMissedAndDelayedSync() (gas: 45123295)
+[PASS] testPrunedQueueRecoveryCadenceWithWithdrawals() (gas: 45159187)
+[PASS] testPrunedQueueSameTimestampRedeposit() (gas: 7830945)
+[PASS] testPrunedQueueUnderSustainedLiveArrivals() (gas: 63015389)
+[PASS] testPrunedQueueUnlinksHeadMiddleAndTail() (gas: 4529205)
+[PASS] testPrunedSlotsPreserveLazyRewardsAcrossBacklogBatches() (gas: 37068111)
+[PASS] testVaultCapCountsPendingAndActivePrincipal() (gas: 4650073)
+Suite result: ok. 15 passed; 0 failed; 0 skipped; finished in 41.12s (193.28s CPU time)
+
+Ran 7 test suites in 41.12s (158.50s CPU time): 59 tests passed, 0 failed, 0 skipped (59 total tests)
+
+Local queue-status suite (prior run, unchanged test source)
+✔ pending or dropped sync does not defer backup handoff (0.8908ms)
+✔ delayed inclusion resets the timer only after confirmed progress (0.1038ms)
+✔ a successful zero-key sync preserves the last progress timestamp (0.0646ms)
+✔ confirmed recovery clears stall and a new blocked period starts a new timer (0.0702ms)
+✔ stale data does not trigger dispatch based on an unverified queue (0.6068ms)
+✔ only overdue and exactly due keys count toward the inline limit (0.1722ms)
+✔ replacing a progress block restores the previous stall timer (0.0989ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 7
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 61.6611
