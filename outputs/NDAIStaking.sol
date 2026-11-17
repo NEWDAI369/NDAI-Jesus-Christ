@@ -12,16 +12,17 @@ interface INDAI {
 }
 
 /// @title NDAIStaking
-/// @notice HEX-style staking: longer pays better (up to 3x) + ongoing ~3.69% yearly inflation.
-/// @notice Extract accrued yield as NEW without ending the stake.
-/// @notice NEW is redeemable 1:1 for NDAI on or after the stake's end day.
+/// @notice Stake NDAI and extract accrued yield as NEW tokens without ending the stake.
+/// @notice Longer stakes earn a higher multiplier (up to 3x).
+/// @notice NEW tokens are redeemable 1:1 for NDAI on or after the stake's end day.
+/// @notice Base yield is approximately 3.69% per year before the length multiplier.
 contract NDAIStaking is ReentrancyGuard {
     using SafeERC20 for IERC20;
 
     IERC20 public immutable ndai;
     uint256 public immutable launchTime;
 
-    // ~3.69% per year = 0.0369 * 1e18 / 365 ≈ 1.01096e14 per token per day
+    // ~3.69% per year
     uint256 public constant DAILY_YIELD_PER_TOKEN = 101096000000000;
 
     struct StakeInstance {
@@ -48,8 +49,7 @@ contract NDAIStaking is ReentrancyGuard {
         return (block.timestamp - launchTime) / 1 days;
     }
 
-    /// @notice Longer pays better multiplier (same curve as HEX).
-    /// @return 1e18 = 1x, up to 3e18 = 3x at 3641 days.
+    /// @notice Length multiplier: 1x up to 3x.
     function getMultiplier(uint256 lengthInDays) public pure returns (uint256) {
         if (lengthInDays <= 1) return 1e18;
         uint256 bonus = ((lengthInDays - 1) * 1e18) / 1820;
