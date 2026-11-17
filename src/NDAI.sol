@@ -128,7 +128,7 @@ contract NDAI is ERC20, ReentrancyGuard, Ownable {
         uint256 daiOut = params.ndaiOut;
         uint256[] memory amounts = router.getAmountsIn(daiOut, path);
         uint256 pdaiForDai = amounts[0];
-        uint256 contribution = pdaiForDai / 5;
+        uint256 contribution = pdaiForDai / 10;   // 10% total → 5% PLSX + 5% pDAI
         if (contribution < 2) revert InvalidMint();
         uint256 payment = pdaiForDai + contribution;
         if (payment > params.maxPdaiIn) revert PaymentLimitExceeded();
