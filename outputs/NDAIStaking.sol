@@ -22,7 +22,7 @@ contract NDAIStaking is ReentrancyGuard {
     uint256 public immutable launchTime;
 
     // ~3.69% per year = 0.0369 * 1e18 / 365 ≈ 1.01096e14 per token per day
-    uint256 public immutable dailyYieldPerToken;
+    uint256 public constant DAILY_YIELD_PER_TOKEN = 101096000000000;
 
     struct StakeInstance {
         uint256 principal;
@@ -38,9 +38,8 @@ contract NDAIStaking is ReentrancyGuard {
     event YieldExtracted(address indexed user, uint256 stakeId, uint256 newAmount);
     event StakeEnded(address indexed user, uint256 stakeId, uint256 payout);
 
-    constructor(address _ndai, uint256 _dailyYieldPerToken, uint256 _launchTime) {
+    constructor(address _ndai, uint256 _launchTime) {
         ndai = IERC20(_ndai);
-        dailyYieldPerToken = _dailyYieldPerToken; // set to ~1.01096e14 for ~3.69% APY
         launchTime = _launchTime;
     }
 
@@ -85,7 +84,7 @@ contract NDAIStaking is ReentrancyGuard {
         uint256 daysElapsed = effectiveDay > s.startDay ? effectiveDay - s.startDay : 0;
 
         uint256 multiplier = getMultiplier(s.endDay - s.startDay);
-        uint256 accrued = (s.principal * dailyYieldPerToken * daysElapsed * multiplier) / 1e36;
+        uint256 accrued = (s.principal * DAILY_YIELD_PER_TOKEN * daysElapsed * multiplier) / 1e36;
         uint256 available = accrued > s.extracted ? accrued - s.extracted : 0;
         require(available > 0, "Nothing");
 
@@ -103,7 +102,7 @@ contract NDAIStaking is ReentrancyGuard {
 
         uint256 daysElapsed = s.endDay - s.startDay;
         uint256 multiplier = getMultiplier(daysElapsed);
-        uint256 totalYield = (s.principal * dailyYieldPerToken * daysElapsed * multiplier) / 1e36;
+        uint256 totalYield = (s.principal * DAILY_YIELD_PER_TOKEN * daysElapsed * multiplier) / 1e36;
         uint256 remainingYield = totalYield > s.extracted ? totalYield - s.extracted : 0;
 
         uint256 mintedNow = 0;
