@@ -11,6 +11,10 @@ interface INDAI {
     function totalSupply() external view returns (uint256);
 }
 
+/// @title NDAIStaking
+/// @notice Stake NDAI and extract accrued yield as NEW tokens without ending the stake.
+/// @notice NEW tokens are redeemable 1:1 for NDAI on or after the stake's end day.
+/// @notice Total yield minted is hard-capped at 10% of NDAI total supply.
 contract NDAIStaking is ReentrancyGuard {
     using SafeERC20 for IERC20;
 
@@ -18,7 +22,7 @@ contract NDAIStaking is ReentrancyGuard {
     uint256 public immutable launchTime;
     uint256 public totalYieldMinted;
     uint256 public constant YIELD_CAP_BPS = 1000; // 10%
-    uint256 public immutable dailyYieldPerToken; // fixed at deployment
+    uint256 public immutable dailyYieldPerToken;
 
     struct StakeInstance {
         uint256 principal;
@@ -61,10 +65,13 @@ contract NDAIStaking is ReentrancyGuard {
         emit StakeCreated(msg.sender, stakeInstances[msg.sender].length - 1, amount, start + lengthInDays);
     }
 
+    /// @notice Extract accrued yield as NEW without ending the stake.
+    /// @param newToken Must be a NEW contract whose maturityDay equals this stake's endDay.
     function extractNEW(uint256 stakeId, address newToken) external nonReentrant {
         StakeInstance storage s = stakeInstances[msg.sender][stakeId];
         require(s.active, "Inactive");
         require(NEW(newToken).staking() == address(this), "Invalid NEW");
+        require(NEW(newToken).maturityDay() == s.endDay, "Maturity mismatch");
 
         uint256 dayNow = currentDay();
         uint256 effectiveDay = dayNow > s.endDay ? s.endDay : dayNow;
@@ -105,10 +112,9 @@ contract NDAIStaking is ReentrancyGuard {
             }
         }
 
-        // Only pay what we actually have for this stake (principal + minted yield)
-        uint256 payout = s.principal + s.extracted + mintedNow - s.extracted;
-        // Simplified: principal + actually extracted + newly minted
-        payout = s.principal + mintedNow;
+        // Pay only principal + newly minted yield for this stake.
+        // Previously extracted yield is already represented by NEW tokens.
+        uint256 payout = s.principal + mintedNow;
 
         s.active = false;
         ndai.safeTransfer(msg.sender, payout);
@@ -131,6 +137,7 @@ contract NEW is ERC20 {
         _mint(to, amount);
     }
 
+    /// @notice Redeem NEW 1:1 for NDAI on or after maturityDay.
     function redeem(uint256 amount) external {
         require(NDAIStaking(staking).currentDay() >= maturityDay, "Early");
         _burn(msg.sender, amount);
