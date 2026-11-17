@@ -1,18 +1,25 @@
-# NDAI pre-launch information package
+# NDAI Protocol
 
-This package describes the planned NDAI and NEW launch on PulseChain (chain ID 369). Minting and staking are not live. The manifest is for pre-launch integration. Use only independently verified addresses when a deployment record is published.
+Pre-launch information package for NDAI and NEW on PulseChain (chain ID 369).
 
-**Use at your own risk. You could lose all assets you commit. NDAI has no dollar peg or DAI redemption right. Staking can restrict access to your NDAI, and rewards may be zero.**
+Minting and staking are not yet live. This repository is for review and pre-launch integration. Use only independently verified contract addresses once an official deployment is published.
 
-**Important:** NDAI is not backed by the locked DAI. The DAI sent to the reserve during minting is permanently locked and cannot be withdrawn by anyone. It serves only as a public display of how much NDAI has been minted. Users cannot redeem NDAI for DAI, and there is no way to exchange DAI for NDAI. The reserve creates no peg and no claim.
+**Use at your own risk.** You can lose all assets you commit. NDAI has no dollar peg and no redemption right for DAI. Staking can lock your NDAI for a chosen period, and yield may be zero once the emission cap is reached.
 
-- [Full risk disclosure](outputs/NDAI-Risk-Disclosure.md)
+### Important
+NDAI is not backed by the locked DAI. During minting, DAI is permanently locked in a reserve that no one can withdraw. The reserve exists only as a public display of how much NDAI has been minted. Users cannot redeem NDAI for DAI, and there is no mechanism to exchange DAI for NDAI. The reserve creates no peg and no claim.
+
+### Documentation
+- [Risk disclosure](outputs/NDAI-Risk-Disclosure.md)
 - [Integration guide](outputs/NDAI-Integration-Guide.md) and [series manifest](outputs/NDAI-Official-Series.json)
 - [Technical specification](outputs/NDAI-Technical-Specification.md) and [accounting amendment](outputs/NDAI-Accounting-Amendment.md)
 - [Verification report](outputs/NDAI-Verification-Report.md), [fork test results](outputs/NDAI-Fork-Test-Results.txt), and [dependency evidence](outputs/NDAI-PulseChain-Dependency-Evidence.txt)
-- Contract source and raw results are in outputs. Test sources are in test and interface definitions are in abi.
 
-The package includes previously recorded tests. Results should be matched to the source fingerprints documented in the verification report. These tests do not constitute an independent audit. For a source build, install OpenZeppelin Contracts 5.0.2 at the path specified by remappings.txt.
+Contract source is in `outputs/`. Tests are in `test/`. ABIs are in `abi/`.
 
-Deployment status: No official NDAI deployment has been announced. Third-party deployments are unaffiliated with this project.
-This is the NEW Testament version and not the one with "NDAI" with the 40 days and 40 nights are the Old testament.
+Previously recorded tests are included for reference. Match results against the source fingerprints in the verification report. These tests are not an independent audit. To build from source, install OpenZeppelin Contracts 5.0.2 at the path listed in `remappings.txt`.
+
+### Status
+No official deployment has been announced. Third-party deployments are unaffiliated with this project.
+
+This is the current NDAI protocol (permanent DAI lock mint + capped staking with NEW time tokens). It replaces the earlier design.
