@@ -6,22 +6,15 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 interface IPulseXRouter {
     function factory() external view returns (address);
     function getAmountOut(uint256 amountIn, uint256 reserveIn, uint256 reserveOut) external pure returns (uint256);
-    function getAmountsIn(uint256 amountOut, address[] calldata path)
-        external view returns (uint256[] memory amounts);
-    function swapTokensForExactTokens(
-        uint256 amountOut, uint256 amountInMax, address[] calldata path, address to, uint256 deadline
-    ) external returns (uint256[] memory amounts);
-    function swapExactTokensForTokens(
-        uint256 amountIn, uint256 amountOutMin, address[] calldata path, address to, uint256 deadline
-    ) external returns (uint256[] memory amounts);
-    function addLiquidity(
-        address tokenA, address tokenB, uint256 desiredA, uint256 desiredB,
-        uint256 minA, uint256 minB, address to, uint256 deadline
-    ) external returns (uint256 amountA, uint256 amountB, uint256 liquidity);
+    function getAmountsIn(uint256 amountOut, address[] calldata path) external view returns (uint256[] memory amounts);
+    function swapTokensForExactTokens(uint256 amountOut, uint256 amountInMax, address[] calldata path, address to, uint256 deadline) external returns (uint256[] memory amounts);
+    function swapExactTokensForTokens(uint256 amountIn, uint256 amountOutMin, address[] calldata path, address to, uint256 deadline) external returns (uint256[] memory amounts);
+    function addLiquidity(address tokenA, address tokenB, uint256 desiredA, uint256 desiredB, uint256 minA, uint256 minB, address to, uint256 deadline) external returns (uint256 amountA, uint256 amountB, uint256 liquidity);
 }
 
 interface IPulseXFactory {
@@ -39,7 +32,7 @@ interface IPulseXPair {
     function getReserves() external view returns (uint112, uint112, uint32);
 }
 
-contract NDAI is ERC20, ReentrancyGuard {
+contract NDAI is ERC20, ReentrancyGuard, Ownable {
     using SafeERC20 for IERC20;
 
     uint256 public immutable LAUNCH_TIME;
@@ -57,7 +50,6 @@ contract NDAI is ERC20, ReentrancyGuard {
     address public immutable liquidityRecipient;
     address public immutable reserveWallet;
 
-    // ===== ADDED FOR STAKING YIELD =====
     address public stakingContract;
 
     struct MintParams {
@@ -80,26 +72,16 @@ contract NDAI is ERC20, ReentrancyGuard {
     error ReserveFraction();
 
     event ReserveFunded(address indexed account, uint256 daiLocked);
-    event Minted(
-        address indexed account, uint256 ndaiMinted, uint256 pdaiForDai, uint256 pdaiForPlsx,
-        uint256 pdaiAdded, uint256 plsxAdded, uint256 lpMinted, uint256 pdaiRefund, uint256 plsxRefund
-    );
+    event Minted(address indexed account, uint256 ndaiMinted, uint256 pdaiForDai, uint256 pdaiForPlsx, uint256 pdaiAdded, uint256 plsxAdded, uint256 lpMinted, uint256 pdaiRefund, uint256 plsxRefund);
 
-    constructor(IPulseXRouter pulseRouter, uint256 launchTime) ERC20("NDAI", "NDAI") {
+    constructor(IPulseXRouter pulseRouter, uint256 launchTime) ERC20("NDAI", "NDAI") Ownable(msg.sender) {
         if (block.chainid != 369 || launchTime == 0 || address(pulseRouter) != PULSEX_ROUTER || PULSEX_ROUTER.code.length == 0) {
             revert InvalidConfiguration();
         }
-        if (
-            pulseRouter.factory() != PULSEX_FACTORY || PDAI.code.length == 0 ||
-            IERC20Metadata(DAI).decimals() != decimals()
-        ) revert InvalidConfiguration();
+        if (pulseRouter.factory() != PULSEX_FACTORY || PDAI.code.length == 0 || IERC20Metadata(DAI).decimals() != decimals()) revert InvalidConfiguration();
 
         IPulseXFactory factory = IPulseXFactory(PULSEX_FACTORY);
-        if (
-            factory.getPair(PDAI, PLSX) == address(0) ||
-            factory.getPair(PLSX, WPLS) == address(0) ||
-            factory.getPair(WPLS, DAI) == address(0)
-        ) revert InvalidConfiguration();
+        if (factory.getPair(PDAI, PLSX) == address(0) || factory.getPair(PLSX, WPLS) == address(0) || factory.getPair(WPLS, DAI) == address(0)) revert InvalidConfiguration();
 
         LAUNCH_TIME = launchTime;
         router = pulseRouter;
@@ -115,9 +97,9 @@ contract NDAI is ERC20, ReentrancyGuard {
         return IERC20(DAI).balanceOf(reserveWallet);
     }
 
-    // ===== ADDED FUNCTIONS =====
-    function setStakingContract(address _staking) external {
+    function setStakingContract(address _staking) external onlyOwner {
         require(stakingContract == address(0), "Already set");
+        require(_staking != address(0), "Zero address");
         stakingContract = _staking;
     }
 
@@ -125,15 +107,10 @@ contract NDAI is ERC20, ReentrancyGuard {
         require(msg.sender == stakingContract, "Only staking");
         _mint(to, amount);
     }
-    // ===== END ADDED FUNCTIONS =====
 
     function mintWithPdai(MintParams calldata params) external nonReentrant {
         if (block.timestamp < LAUNCH_TIME) revert LaunchPending();
-        if (
-            params.ndaiOut < 1 ether || params.ndaiOut > 100 ether || params.minPlsxOut == 0 || params.minPdaiAdded == 0 ||
-            params.minPlsxAdded == 0 || params.minLpOut == 0 || block.timestamp > params.deadline ||
-            params.deadline - block.timestamp > 5 minutes
-        ) revert InvalidMint();
+        if (params.ndaiOut < 1 ether || params.ndaiOut > 100 ether || params.minPlsxOut == 0 || params.minPdaiAdded == 0 || params.minPlsxAdded == 0 || params.minLpOut == 0 || block.timestamp > params.deadline || params.deadline - block.timestamp > 5 minutes) revert InvalidMint();
 
         address[] memory path = new address[](4);
         path[0] = PDAI;
@@ -153,9 +130,7 @@ contract NDAI is ERC20, ReentrancyGuard {
         IERC20 pdai = IERC20(PDAI);
         uint256 initialPdai = pdai.balanceOf(address(this));
         pdai.safeTransferFrom(msg.sender, address(this), payment);
-        if (pdai.balanceOf(address(this)) != initialPdai + payment) {
-            revert UnexpectedTokenBalance();
-        }
+        if (pdai.balanceOf(address(this)) != initialPdai + payment) revert UnexpectedTokenBalance();
 
         _fundReserve(path, daiOut, pdaiForDai, params.deadline);
         _addLiquidity(params, pdaiForDai, contribution);
@@ -190,14 +165,10 @@ contract NDAI is ERC20, ReentrancyGuard {
         if (reserve == 0 || amount > reserve * 4 / 100) revert ReserveFraction();
     }
 
-    function _fundReserve(
-        address[] memory path, uint256 daiOut, uint256 pdaiForDai, uint256 deadline
-    ) private {
+    function _fundReserve(address[] memory path, uint256 daiOut, uint256 pdaiForDai, uint256 deadline) private {
         uint256 initialDai = IERC20(DAI).balanceOf(reserveWallet);
         IERC20(PDAI).forceApprove(address(router), pdaiForDai);
-        uint256[] memory spent = router.swapTokensForExactTokens(
-            daiOut, pdaiForDai, path, reserveWallet, deadline
-        );
+        uint256[] memory spent = router.swapTokensForExactTokens(daiOut, pdaiForDai, path, reserveWallet, deadline);
         IERC20(PDAI).forceApprove(address(router), 0);
         uint256 received = IERC20(DAI).balanceOf(reserveWallet) - initialDai;
         if (spent[0] != pdaiForDai || received < daiOut) revert UnexpectedTokenBalance();
@@ -205,9 +176,7 @@ contract NDAI is ERC20, ReentrancyGuard {
         emit ReserveFunded(msg.sender, received);
     }
 
-    function _addLiquidity(MintParams calldata params, uint256 pdaiForDai, uint256 contribution)
-        private
-    {
+    function _addLiquidity(MintParams calldata params, uint256 pdaiForDai, uint256 contribution) private {
         IERC20 pdai = IERC20(PDAI);
         IERC20 plsx = IERC20(PLSX);
         uint256 initialPlsx = plsx.balanceOf(address(this));
@@ -222,9 +191,7 @@ contract NDAI is ERC20, ReentrancyGuard {
         _checkFraction(pdaiForPlsx, input);
         _checkFraction(router.getAmountOut(pdaiForPlsx, input, output), output);
         pdai.forceApprove(address(router), pdaiForPlsx);
-        router.swapExactTokensForTokens(
-            pdaiForPlsx, params.minPlsxOut, path, address(this), params.deadline
-        );
+        router.swapExactTokensForTokens(pdaiForPlsx, params.minPlsxOut, path, address(this), params.deadline);
         uint256 plsxReceived = plsx.balanceOf(address(this)) - initialPlsx;
         if (plsxReceived < params.minPlsxOut) revert UnexpectedTokenBalance();
 
@@ -232,13 +199,8 @@ contract NDAI is ERC20, ReentrancyGuard {
         plsx.forceApprove(address(router), plsxReceived);
         IERC20 lpToken = IERC20(IPulseXFactory(PULSEX_FACTORY).getPair(PDAI, PLSX));
         uint256 initialLp = lpToken.balanceOf(liquidityRecipient);
-        (uint256 pdaiAdded, uint256 plsxAdded, uint256 lpMinted) = router.addLiquidity(
-            PDAI, PLSX, pdaiForPool, plsxReceived, params.minPdaiAdded, params.minPlsxAdded,
-            liquidityRecipient, params.deadline
-        );
-        if (pdaiAdded < params.minPdaiAdded || plsxAdded < params.minPlsxAdded) {
-            revert InsufficientLiquidityDeposit();
-        }
+        (uint256 pdaiAdded, uint256 plsxAdded, uint256 lpMinted) = router.addLiquidity(PDAI, PLSX, pdaiForPool, plsxReceived, params.minPdaiAdded, params.minPlsxAdded, liquidityRecipient, params.deadline);
+        if (pdaiAdded < params.minPdaiAdded || plsxAdded < params.minPlsxAdded) revert InsufficientLiquidityDeposit();
         if (lpMinted < params.minLpOut || lpToken.balanceOf(liquidityRecipient) - initialLp != lpMinted) revert InsufficientLiquidityTokens();
         pdai.forceApprove(address(router), 0);
         plsx.forceApprove(address(router), 0);
@@ -248,9 +210,6 @@ contract NDAI is ERC20, ReentrancyGuard {
         if (pdaiRefund != 0) pdai.safeTransfer(msg.sender, pdaiRefund);
         if (plsxRefund != 0) plsx.safeTransfer(msg.sender, plsxRefund);
 
-        emit Minted(
-            msg.sender, params.ndaiOut, pdaiForDai, pdaiForPlsx,
-            pdaiAdded, plsxAdded, lpMinted, pdaiRefund, plsxRefund
-        );
+        emit Minted(msg.sender, params.ndaiOut, pdaiForDai, pdaiForPlsx, pdaiAdded, plsxAdded, lpMinted, pdaiRefund, plsxRefund);
     }
 }
