@@ -12,16 +12,16 @@ interface INDAI {
 }
 
 /// @title NDAIStaking
-/// @notice Stake NDAI and extract accrued yield as NEW tokens without ending the stake.
-/// @notice NEW tokens are redeemable 1:1 for NDAI on or after the stake's end day.
-/// @notice Total yield minted is hard-capped at 10% of NDAI total supply.
+/// @notice HEX-style staking: longer pays better (up to 3x) + ongoing ~3.69% yearly inflation.
+/// @notice Extract accrued yield as NEW without ending the stake.
+/// @notice NEW is redeemable 1:1 for NDAI on or after the stake's end day.
 contract NDAIStaking is ReentrancyGuard {
     using SafeERC20 for IERC20;
 
     IERC20 public immutable ndai;
     uint256 public immutable launchTime;
-    uint256 public totalYieldMinted;
-    uint256 public constant YIELD_CAP_BPS = 1000; // 10%
+
+    // ~3.69% per year = 0.0369 * 1e18 / 365 ≈ 1.01096e14 per token per day
     uint256 public immutable dailyYieldPerToken;
 
     struct StakeInstance {
@@ -40,13 +40,22 @@ contract NDAIStaking is ReentrancyGuard {
 
     constructor(address _ndai, uint256 _dailyYieldPerToken, uint256 _launchTime) {
         ndai = IERC20(_ndai);
-        dailyYieldPerToken = _dailyYieldPerToken;
+        dailyYieldPerToken = _dailyYieldPerToken; // set to ~1.01096e14 for ~3.69% APY
         launchTime = _launchTime;
     }
 
     function currentDay() public view returns (uint256) {
         if (block.timestamp < launchTime) return 0;
         return (block.timestamp - launchTime) / 1 days;
+    }
+
+    /// @notice Longer pays better multiplier (same curve as HEX).
+    /// @return 1e18 = 1x, up to 3e18 = 3x at 3641 days.
+    function getMultiplier(uint256 lengthInDays) public pure returns (uint256) {
+        if (lengthInDays <= 1) return 1e18;
+        uint256 bonus = ((lengthInDays - 1) * 1e18) / 1820;
+        if (bonus > 2e18) bonus = 2e18;
+        return 1e18 + bonus;
     }
 
     function createStake(uint256 amount, uint256 lengthInDays) external nonReentrant {
@@ -65,8 +74,6 @@ contract NDAIStaking is ReentrancyGuard {
         emit StakeCreated(msg.sender, stakeInstances[msg.sender].length - 1, amount, start + lengthInDays);
     }
 
-    /// @notice Extract accrued yield as NEW without ending the stake.
-    /// @param newToken Must be a NEW contract whose maturityDay equals this stake's endDay.
     function extractNEW(uint256 stakeId, address newToken) external nonReentrant {
         StakeInstance storage s = stakeInstances[msg.sender][stakeId];
         require(s.active, "Inactive");
@@ -77,16 +84,12 @@ contract NDAIStaking is ReentrancyGuard {
         uint256 effectiveDay = dayNow > s.endDay ? s.endDay : dayNow;
         uint256 daysElapsed = effectiveDay > s.startDay ? effectiveDay - s.startDay : 0;
 
-        uint256 accrued = (s.principal * dailyYieldPerToken * daysElapsed) / 1e18;
+        uint256 multiplier = getMultiplier(s.endDay - s.startDay);
+        uint256 accrued = (s.principal * dailyYieldPerToken * daysElapsed * multiplier) / 1e36;
         uint256 available = accrued > s.extracted ? accrued - s.extracted : 0;
         require(available > 0, "Nothing");
 
-        uint256 cap = (INDAI(address(ndai)).totalSupply() * YIELD_CAP_BPS) / 10000;
-        require(totalYieldMinted + available <= cap, "Cap reached");
-
         s.extracted += available;
-        totalYieldMinted += available;
-
         INDAI(address(ndai)).mintYield(address(this), available);
         NEW(newToken).mint(msg.sender, available);
 
@@ -99,23 +102,17 @@ contract NDAIStaking is ReentrancyGuard {
         require(currentDay() >= s.endDay, "Not matured");
 
         uint256 daysElapsed = s.endDay - s.startDay;
-        uint256 totalYield = (s.principal * dailyYieldPerToken * daysElapsed) / 1e18;
+        uint256 multiplier = getMultiplier(daysElapsed);
+        uint256 totalYield = (s.principal * dailyYieldPerToken * daysElapsed * multiplier) / 1e36;
         uint256 remainingYield = totalYield > s.extracted ? totalYield - s.extracted : 0;
 
         uint256 mintedNow = 0;
         if (remainingYield > 0) {
-            uint256 cap = (INDAI(address(ndai)).totalSupply() * YIELD_CAP_BPS) / 10000;
-            if (totalYieldMinted + remainingYield <= cap) {
-                INDAI(address(ndai)).mintYield(address(this), remainingYield);
-                totalYieldMinted += remainingYield;
-                mintedNow = remainingYield;
-            }
+            INDAI(address(ndai)).mintYield(address(this), remainingYield);
+            mintedNow = remainingYield;
         }
 
-        // Pay only principal + newly minted yield for this stake.
-        // Previously extracted yield is already represented by NEW tokens.
         uint256 payout = s.principal + mintedNow;
-
         s.active = false;
         ndai.safeTransfer(msg.sender, payout);
 
@@ -137,7 +134,6 @@ contract NEW is ERC20 {
         _mint(to, amount);
     }
 
-    /// @notice Redeem NEW 1:1 for NDAI on or after maturityDay.
     function redeem(uint256 amount) external {
         require(NDAIStaking(staking).currentDay() >= maturityDay, "Early");
         _burn(msg.sender, amount);
