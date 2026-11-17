@@ -4,6 +4,8 @@ This package describes the planned NDAI and NEW launch on PulseChain (chain ID 3
 
 **Use at your own risk. You could lose all assets you commit. NDAI has no dollar peg or DAI redemption right. Staking can restrict access to your NDAI, and rewards may be zero.**
 
+**Important:** NDAI is not backed by the locked DAI. The DAI sent to the reserve during minting is permanently locked and cannot be withdrawn by anyone. It serves only as a public display of how much NDAI has been minted. Users cannot redeem NDAI for DAI, and there is no way to exchange DAI for NDAI. The reserve creates no peg and no claim.
+
 - [Full risk disclosure](outputs/NDAI-Risk-Disclosure.md)
 - [Integration guide](outputs/NDAI-Integration-Guide.md) and [series manifest](outputs/NDAI-Official-Series.json)
 - [Technical specification](outputs/NDAI-Technical-Specification.md) and [accounting amendment](outputs/NDAI-Accounting-Amendment.md)
@@ -13,4 +15,4 @@ This package describes the planned NDAI and NEW launch on PulseChain (chain ID 3
 The package includes previously recorded tests. Results should be matched to the source fingerprints documented in the verification report. These tests do not constitute an independent audit. For a source build, install OpenZeppelin Contracts 5.0.2 at the path specified by remappings.txt.
 
 Deployment status: No official NDAI deployment has been announced. Third-party deployments are unaffiliated with this project.
-This is the NEW Testament and the "NDAI" with the 40 days and 40 nights are the Old testamnent. Jesus will rebukes them
+This is the NEW Testament version and not the one with "NDAI" with the 40 days and 40 nights are the Old testament.
