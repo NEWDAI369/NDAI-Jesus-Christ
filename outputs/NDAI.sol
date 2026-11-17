@@ -21,6 +21,7 @@ interface IPulseXFactory {
     function getPair(address tokenA, address tokenB) external view returns (address);
 }
 
+/// @dev No callable methods. Tokens sent here can never be withdrawn.
 contract PermanentTokenLock {
     constructor() {
         if (block.chainid != 369) revert();
@@ -32,6 +33,10 @@ interface IPulseXPair {
     function getReserves() external view returns (uint112, uint112, uint32);
 }
 
+/// @title NDAI
+/// @notice NDAI is not redeemable for DAI or pDAI.
+/// @notice The DAI locked in the reserve is permanently locked and serves only as a public display of mint volume.
+/// @notice There is no peg, no redemption right, and no claim on the reserve.
 contract NDAI is ERC20, ReentrancyGuard, Ownable {
     using SafeERC20 for IERC20;
 
