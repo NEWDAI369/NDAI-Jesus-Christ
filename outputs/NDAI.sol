@@ -28,7 +28,6 @@ interface IPulseXFactory {
     function getPair(address tokenA, address tokenB) external view returns (address);
 }
 
-/// @dev No callable methods, approvals, upgrade path, or token withdrawals.
 contract PermanentTokenLock {
     constructor() {
         if (block.chainid != 369) revert();
@@ -58,6 +57,9 @@ contract NDAI is ERC20, ReentrancyGuard {
     address public immutable liquidityRecipient;
     address public immutable reserveWallet;
 
+    // ===== ADDED FOR STAKING YIELD =====
+    address public stakingContract;
+
     struct MintParams {
         uint256 ndaiOut;
         uint256 maxPdaiIn;
@@ -78,7 +80,6 @@ contract NDAI is ERC20, ReentrancyGuard {
     error ReserveFraction();
 
     event ReserveFunded(address indexed account, uint256 daiLocked);
-
     event Minted(
         address indexed account, uint256 ndaiMinted, uint256 pdaiForDai, uint256 pdaiForPlsx,
         uint256 pdaiAdded, uint256 plsxAdded, uint256 lpMinted, uint256 pdaiRefund, uint256 plsxRefund
@@ -114,6 +115,18 @@ contract NDAI is ERC20, ReentrancyGuard {
         return IERC20(DAI).balanceOf(reserveWallet);
     }
 
+    // ===== ADDED FUNCTIONS =====
+    function setStakingContract(address _staking) external {
+        require(stakingContract == address(0), "Already set");
+        stakingContract = _staking;
+    }
+
+    function mintYield(address to, uint256 amount) external {
+        require(msg.sender == stakingContract, "Only staking");
+        _mint(to, amount);
+    }
+    // ===== END ADDED FUNCTIONS =====
+
     function mintWithPdai(MintParams calldata params) external nonReentrant {
         if (block.timestamp < LAUNCH_TIME) revert LaunchPending();
         if (
@@ -128,7 +141,6 @@ contract NDAI is ERC20, ReentrancyGuard {
         path[2] = WPLS;
         path[3] = DAI;
 
-        // DAI and NDAI use the same 18-decimal base units.
         uint256 daiOut = params.ndaiOut;
         uint256[] memory amounts = router.getAmountsIn(daiOut, path);
         uint256 pdaiForDai = amounts[0];
@@ -177,6 +189,7 @@ contract NDAI is ERC20, ReentrancyGuard {
     function _checkFraction(uint256 amount, uint256 reserve) private pure {
         if (reserve == 0 || amount > reserve * 4 / 100) revert ReserveFraction();
     }
+
     function _fundReserve(
         address[] memory path, uint256 daiOut, uint256 pdaiForDai, uint256 deadline
     ) private {
@@ -241,4 +254,3 @@ contract NDAI is ERC20, ReentrancyGuard {
         );
     }
 }
-
