@@ -1,56 +1,23 @@
-**Minting: Jesus PDAI (0x75C84Ca7eC3F14e4f53aCAbf6eDD628cd1B22bC1)
- died on the cross and rose again (NDAI)**
+**Minting: In Dec 25. PDAI (0x75C84Ca7eC3F14e4f53aCAbf6eDD628cd1B22bC1)
+ died on the cross and rose again (NDAI)
 
-Why seal the LP? Nails pierced His hands (5% each) on the cross. If Jesus had no wounds in His hands, the LP would have been burned. Because both hands were pierced, it is sealed instead, so users can see and believe.
+Why seal the LP? Nails pierced His hands (5% each) on the cross.so users can see and believe.
 
 John 20:27 (NKJV): When Jesus appears to Thomas and the other disciples, He invites Thomas to touch His wounds and believe:
 "Then He said to Thomas, 'Reach your finger here, and look at My hands; and reach your hand here, and put it into My side. Do not be unbelieving, but believing.'"
-
-2 Corinthians 5:15 (NIV): "And he died for all, that those who live should no longer live for themselves but for him who died for them and was raised again."
-
 Hebrews 9:22 (NKJV): "And according to the law almost all things are purified with blood, and without shedding of blood there is no remission."
-
 John 14:6 (NIV): "Jesus answered, 'I am the way and the truth and the life. No one comes to the Father except through me.'"
 
 **Staking NDAI**
+John 2:20–21 captures a pivotal misunderstanding where Jesus uses the physical Jerusalem Temple as a metaphor to prophesy His own crucifixion and resurrection. While the religious leaders focused on the massive stone structure renovated by Herod, Jesus identified His own body as the true dwelling place of God
 
 Luke 17:20–21 (NKJV): Jesus said the Kingdom of God is "within you" when He answered the Pharisees:
-"Now when He was asked by the Pharisees when the kingdom of God would come, He answered them and said, 'The kingdom of God does not come with observation; nor will they say, "See here!" or "See there!" For indeed, the kingdom of God is within you.'"
+"Now when He was asked by the Pharisees when the kingdom of God would come, He answered them and said, 'The kingdom of God does not come with observation; nor will they say, "See here!" or "See there!" For indeed, the kingdom of God is within you.'"which is the staking protocol"
 
-**The old version and the seven churches**
-
-In the Book of Revelation, Jesus called five of the seven churches to repent. The Old Testament version of NDAI (40 Days 40 Nights, with 7 NEW share-weight LP) is not the right one, and so Jesus Christ rebukes it.
-
-Which churches were called to repent (NKJV):
-
-1. Ephesus (Revelation 2:5)
-   - The issue: "Nevertheless I have this against you, that you have left your first love."
-   - The command: "Remember therefore from where you have fallen; repent and do the first works..."
-2. Pergamum / Pergamos (Revelation 2:16)
-   - The issue: Tolerating those who hold the doctrine of Balaam and the Nicolaitans.
-   - The command: "Repent, or else I will come to you quickly and fight against them with the sword of My mouth."
-3. Thyatira (Revelation 2:21–22)
-   - The issue: Tolerating "that woman Jezebel, who calls herself a prophetess, to teach and seduce My servants to commit sexual immorality..."
-   - The command: "And I gave her time to repent of her sexual immorality, and she did not repent. Indeed I will cast her into a sickbed..."
-4. Sardis (Revelation 3:3)
-   - The issue: Having a reputation for being alive, but being spiritually dead.
-   - The command: "Remember therefore how you have received and heard; hold fast and repent."
-5. Laodicea (Revelation 3:19)
-   - The issue: Being lukewarm, neither cold nor hot.
-   - The command: "As many as I love, I rebuke and chasten. Therefore be zealous and repent."
-
-The two churches not told to repent:
-- Smyrna (Revelation 2:8–11) was commended for enduring tribulation and poverty. No rebuke or call to repent was given.
-- Philadelphia (Revelation 3:7–13) was commended for keeping His word and not denying His name. No rebuke or call to repent was given.
-
-**If users want to use the old version, NDAI (40 Days 40 Nights)**
+In Revelation 2–3, Jesus Christ gives specific messages, warnings, commendations, and calls to repentance to seven 1st-century churches in Asia Minor (Ephesus, Smyrna, Pergamum, Thyatira, Sardis, Philadelphia, and Laodicea) directly called for the old version of NDAI (40 Days 40 Nights 7rewards)**
 
 The Bible says (Revelation 20:12, NKJV): "And I saw the dead, small and great, standing before God, and books were opened. And another book was opened, which is the Book of Life. And the dead were judged according to their works, by the things which were written in the books."
 
-The Old Testament was the old version (the first release was NDAI 40 Days 40 Nights), so repent and use the new version. The New Testament is the new NDAI, which adds yield and the NEW time token across all of these contracts.
-
 Revelation 21:27 (NKJV): "But there shall by no means enter it anything that defiles, or causes an abomination or a lie, but only those who are written in the Lamb's Book of Life." The new testament, the Lamb's Book of Life, is this one here: NDAI.
 
----
-
-Do you want a shorter version for the README or for posts?
+The New Testament is the new NDAI, which adds yield and the NEW time token across all of these contracts.
