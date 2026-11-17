@@ -102,6 +102,8 @@ contract NDAI is ERC20, ReentrancyGuard, Ownable {
         return IERC20(DAI).balanceOf(reserveWallet);
     }
 
+    /// @notice Must be called once by the owner after the staking contract is deployed.
+    /// @notice Only the owner can set it, and it can only be set once.
     function setStakingContract(address _staking) external onlyOwner {
         require(stakingContract == address(0), "Already set");
         require(_staking != address(0), "Zero address");
